@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  distributor:
+    build: .
+    command: conda run --no-capture-output -n tugas_4 python tasks_distributor.py
+    ports:
+      - "9921:9921"
+
+  worker_1:
+    build: .
+    command: conda run --no-capture-output -n tugas_4 python worker_1.py
+    environment:
+      - DIST_HOST=distributor
+    depends_on:
+      - distributor
+    ports:
+      - "9933:9933"
+
+  worker_2:
+    build: .
+    command: conda run --no-capture-output -n tugas_4 python worker_2.py
+    environment:
+      - DIST_HOST=distributor
+    depends_on:
+      - distributor
+    ports:
+      - "9932:9932"
+
+  collector_publisher:
+    build: .
+    command: conda run --no-capture-output -n tugas_4 python tasks_collector_publisher.py
+    environment:
+      - W1_HOST=worker_1
+      - W2_HOST=worker_2
+    depends_on:
+      - worker_1
+      - worker_2
+    ports:
+      - "9991:9991"
+
+  sum_subscriber:
+    build: .
+    command: conda run --no-capture-output -n tugas_4 python sum_subscriber.py
+    environment:
+      - PUB_HOST=collector_publisher
+    depends_on:
+      - collector_publisher
+
+  mut_subscriber:
+    build: .
+    command: conda run --no-capture-output -n tugas_4 python mut_subscriber.py
+    environment:
+      - PUB_HOST=collector_publisher
+    depends_on:
+      - collector_publisher
+
+  div_subscriber:
+    build: .
+    command: conda run --no-capture-output -n tugas_4 python div_subscriber.py
+    environment:
+      - PUB_HOST=collector_publisher
+    depends_on:
+      - collector_publisher
