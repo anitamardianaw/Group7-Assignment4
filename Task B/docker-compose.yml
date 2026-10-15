@@ -1,0 +1,53 @@
+services:
+  collector:
+    build: .
+    command: python collector.py
+    environment:
+      TASK_COUNT: "2"
+      RESULT_ENDPOINTS: "worker1:9933,worker2:9932"
+    ports:
+      - "9933:9933"
+      - "9932:9932"
+    networks: [zmqnet]
+
+  worker1:
+    build: .
+    command: python worker.py
+    environment:
+      WORKER_NAME: "Worker 1"
+      TASK_HOST: "distributor"
+      TASK_PORT: "9921"
+      RESULT_PORT: "9933"
+      TASK_COUNT: "2"
+    depends_on: [collector]
+    networks: [zmqnet]
+
+  worker2:
+    build: .
+    command: python worker.py
+    environment:
+      WORKER_NAME: "Worker 2"
+      TASK_HOST: "distributor"
+      TASK_PORT: "9922"
+      RESULT_PORT: "9932"
+      TASK_COUNT: "2"
+    depends_on: [collector]
+    networks: [zmqnet]
+
+  distributor:
+    build: .
+    command: python distributor.py
+    environment:
+      ZMQ_HOST: "*"
+      WORKER1_TASK_PORT: "9921"
+      WORKER2_TASK_PORT: "9922"
+      STARTUP_DELAY: "3"
+    ports:
+      - "9921:9921"
+      - "9922:9922"
+    depends_on: [worker1, worker2]
+    networks: [zmqnet]
+
+networks:
+  zmqnet:
+    driver: bridge
