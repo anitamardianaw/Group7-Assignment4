@@ -1,0 +1,8 @@
+name: task-d-reticulum
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13
+  - pip
+  - pip:
+      - rns
