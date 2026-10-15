@@ -1,0 +1,42 @@
+version: '3'
+services:
+  publisher:
+    build: .
+    command: python publisher.py
+    networks:
+      - net
+
+  subscriber1:
+    build: .
+    command: python subscriber.py 103012340448
+    depends_on:
+      - publisher
+    networks:
+      - net
+
+  subscriber2:
+    build: .
+    command: python subscriber.py 103012440018
+    depends_on:
+      - publisher
+    networks:
+      - net
+
+  subscriber3:
+    build: .
+    command: python subscriber.py 103012440020
+    depends_on:
+      - publisher
+    networks:
+      - net
+
+  subscriber4:
+    build: .
+    command: python subscriber.py 103012440022
+    depends_on:
+      - publisher
+    networks:
+      - net
+
+networks:
+  net:
